@@ -1,0 +1,103 @@
+<html>
+<head>
+    <title></title>
+    <link rel="stylesheet" href="edi.css"/>
+    <link rel="stylesheet" href="ecl.css"/>
+    <link rel="stylesheet" href="esh.css"/>
+    <script src="edi.js"></script>
+    <script src="clj.js"></script>
+    <script src="css.js"></script>
+    <script src="ejs.js"></script>
+    <script src="epl.js"></script>
+    <script src="xml.js"></script>
+    <script src="mal.js"></script>
+    <script src="mmb.js"></script>
+    <script src="msh.js"></script>
+    <script src="mhj.js"></script>
+    <script src="mhx.js"></script>
+    <script src="mhh.js"></script>
+    <script src="mhc.js"></script>
+    <script src="ljq.js"></script>
+    <script src="laj.js"></script>
+    <style>
+        table { width: 100%; max-width: 100%; min-witdh: 100% }
+        td { width: 33%; max-width: 33%; min-witdh: 25%  }
+    </style>
+</head>
+<body>
+    <h2 onclick="show()">Sandboy <span class="countdown"></span></h2>
+    <table><tr>
+        <td><h3 onclick="">JS </h3></td>
+        <td><h3>HTML</h3></td>
+        <td><h3>CSS</h3></td>
+    </tr><tr>
+        <td><textarea id="js" style="display: none;"></textarea></td>
+        <td><textarea id="htm" style="display: none;"></textarea></td>
+        <td><textarea id="css" style="display: none;"></textarea></td>
+    </tr></table>
+    <div id="result"></div>
+    <script>
+        var ejs = CodeMirror.fromTextArea(document.getElementById("js"), {
+            mode: "javascript",
+            lineNumbers: true,
+            styleActiveLine: true,
+            matchBrackets: true,
+            extraKeys: {"Ctrl-Space": "autocomplete"},
+            theme: 'eclipse'
+        });
+        var ehtm = CodeMirror.fromTextArea(document.getElementById("htm"), {
+            mode: "text/html",
+            lineNumbers: true,
+            styleActiveLine: true,
+            matchBrackets: true,
+            extraKeys: {"Ctrl-Space": "autocomplete"},
+            theme: 'eclipse'
+        });
+        var ecss = CodeMirror.fromTextArea(document.getElementById("css"), {
+            mode: "text/css",
+            lineNumbers: true,
+            styleActiveLine: true,
+            matchBrackets: true,
+            extraKeys: {"Ctrl-Space": "autocomplete"},
+            theme: 'eclipse'
+        });
+
+        function render() {
+            $("#result").html("<style type=\"text/css\" scoped>\n"+ecss.getValue()+"\n</style>\n\n"+ehtm.getValue()+"\n\n<script>\n"+ejs.getValue()+"\n</"+"script"+">");
+        }
+        
+        var renderInterval=2;
+        var renderCountdown="";
+        var renderTimer;
+        var countdownTimer;
+        function countdown(){
+            clearTimeout(countdownTimer);
+            if (renderCountdown && renderCountdown > 1) {
+                renderCountdown--;
+                $(".countdown").text(renderCountdown);
+                countdownTimer = setTimeout(countdown, 1000);
+            } else {
+                renderCountdown = "";
+                $(".countdown").text(renderCountdown);
+            }
+        }
+        function willRender() {
+            clearTimeout(countdownTimer);
+            renderCountdown=renderInterval;
+            $(".countdown").text(renderCountdown);
+            countdownTimer = setTimeout(countdown, 1000);
+
+            clearTimeout(renderTimer);
+            renderTimer = setTimeout(function() {
+                clearTimeout(renderTimer);
+                render();
+            }, renderInterval*1000)
+        }
+
+        ejs.on("change", willRender);
+        ehtm.on("change", willRender);
+        ecss.on("change", willRender);
+
+    </script>
+</body>
+</html>
