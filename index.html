@@ -67,8 +67,8 @@
             $("#css").val(localStorage.getItem("css"));
             var altInt = localStorage.getItem("renderInterval");
             if (altInt && (typeof altInt == 'number')) renderInterval=altInt;
-            $("#int").val(altInt);
-            (altInt>0)?$('#ar').prop('checked','checked'):$('#ar').prop('checked',false);
+            $("#int").val(renderInterval);
+            (renderInterval>0)?$('#ar').prop('checked','checked'):$('#ar').prop('checked',false);
 
             ejs = CodeMirror.fromTextArea(document.getElementById("js"), {
                 mode: "javascript",
@@ -118,6 +118,10 @@
             clearTimeout(countdownTimer);
             clearTimeout(renderTimer);
 
+            localStorage.setItem("js", ejs.getValue());
+            localStorage.setItem("htm", ehtm.getValue());
+            localStorage.setItem("css", ecss.getValue());
+
             if (!$("#ar").is(":checked")) return;
 
             renderCountdown=renderInterval;
@@ -129,10 +133,6 @@
                 clearTimeout(renderTimer);
                 render();
             }, renderInterval*1000);
-
-            localStorage.setItem("js", ejs.getValue());
-            localStorage.setItem("htm", ehtm.getValue());
-            localStorage.setItem("css", ecss.getValue());
         }
 
         function end(){
