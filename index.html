@@ -20,56 +20,88 @@
     <script src="ljq.js"></script>
     <script src="laj.js"></script>
     <style>
-        table { width: 100%; max-width: 100%; min-witdh: 100% }
-        td { width: 33%; max-width: 33%; min-witdh: 25%  }
+        table   { width: 100%; max-width: 100%; min-width: 100%; }
+        td      { width: 33% }
+        div.edi { width:100%; min-width: 100%; border:1px solid black; }
     </style>
 </head>
 <body>
-    <h2 onclick="show()">Sandboy <span class="countdown"></span></h2>
+    <h2>Sandboy</h2>
+    <p>
+        <input id="dht" type="checkbox" onclick="$(this).is(':checked')?$('.htm').show():$('.htm').hide();" checked="checked"/>HTML | 
+        <input id="djs" type="checkbox" onclick="$(this).is(':checked')?$('.js').show():$('.js').hide();" checked="checked"/>JS | 
+        <input id="dcs" type="checkbox" onclick="$(this).is(':checked')?$('.css').show():$('.css').hide();" checked="checked"/>CSS | 
+        <input id="ar" type="checkbox" checked="checked"/>auto render in <span class="countdown">0</span> / 
+        <input id="int" type="number" step="1" style="width: 30px"
+            onchange="$(this).val(Math.round($(this).val()));renderInterval=$(this).val();localStorage.setItem('renderInterval', $(this).val());($(this).val()>0)?$('#ar').prop('checked','checked'):$('#ar').prop('checked',false);"/> seconds 
+        <input type="button" value="render now" onclick="render()"/>
+    </p>
     <table><tr>
-        <td><h3 onclick="">JS </h3></td>
-        <td><h3>HTML</h3></td>
-        <td><h3>CSS</h3></td>
+        <td class="htm" onclick="$('#dht').click();"><h3>HTML</h3></td>
+        <td class="js"  onclick="$('#djs').click();"><h3>JS </h3></td>
+        <td class="css" onclick="$('#dcs').click();"><h3>CSS</h3></td>
     </tr><tr>
-        <td><textarea id="js" style="display: none;"></textarea></td>
-        <td><textarea id="htm" style="display: none;"></textarea></td>
-        <td><textarea id="css" style="display: none;"></textarea></td>
+        <td class="htm"><div class="edi"><textarea id="htm" style="display: none;"></textarea></div></td>
+        <td class="js"><div class="edi"><textarea id="js" style="display: none;"></textarea></div></td>
+        <td class="css"><div class="edi"><textarea id="css" style="display: none;"></textarea></div></td>
     </tr></table>
-    <div id="result"></div>
+    <hr/>
+    <iframe id="result" width="100%" frameBorder="0"></iframe>
     <script>
-        var ejs = CodeMirror.fromTextArea(document.getElementById("js"), {
-            mode: "javascript",
-            lineNumbers: true,
-            styleActiveLine: true,
-            matchBrackets: true,
-            extraKeys: {"Ctrl-Space": "autocomplete"},
-            theme: 'eclipse'
-        });
-        var ehtm = CodeMirror.fromTextArea(document.getElementById("htm"), {
-            mode: "text/html",
-            lineNumbers: true,
-            styleActiveLine: true,
-            matchBrackets: true,
-            extraKeys: {"Ctrl-Space": "autocomplete"},
-            theme: 'eclipse'
-        });
-        var ecss = CodeMirror.fromTextArea(document.getElementById("css"), {
-            mode: "text/css",
-            lineNumbers: true,
-            styleActiveLine: true,
-            matchBrackets: true,
-            extraKeys: {"Ctrl-Space": "autocomplete"},
-            theme: 'eclipse'
-        });
-
-        function render() {
-            $("#result").html("<style type=\"text/css\" scoped>\n"+ecss.getValue()+"\n</style>\n\n"+ehtm.getValue()+"\n\n<script>\n"+ejs.getValue()+"\n</"+"script"+">");
-        }
-        
-        var renderInterval=2;
-        var renderCountdown="";
+        var ejs;
+        var ehtm;
+        var ecss;
+        var renderInterval;
+        var renderCountdown;
         var renderTimer;
         var countdownTimer;
+        
+        begin();
+
+        function begin(){
+            renderInterval=2;
+            renderCountdown="0";
+
+            $("#js").val(localStorage.getItem("js"));
+            $("#htm").val(localStorage.getItem("htm"));
+            $("#css").val(localStorage.getItem("css"));
+            var altInt = localStorage.getItem("renderInterval");
+            if (altInt && (typeof altInt == 'number')) renderInterval=altInt;
+            $("#int").val(altInt);
+            (altInt>0)?$('#ar').prop('checked','checked'):$('#ar').prop('checked',false);
+
+            ejs = CodeMirror.fromTextArea(document.getElementById("js"), {
+                mode: "javascript",
+                lineNumbers: true,
+                styleActiveLine: true,
+                matchBrackets: true,
+                extraKeys: {"Ctrl-Space": "autocomplete"},
+                theme: 'eclipse'
+            });
+            ehtm = CodeMirror.fromTextArea(document.getElementById("htm"), {
+                mode: "text/html",
+                lineNumbers: true,
+                styleActiveLine: true,
+                matchBrackets: true,
+                extraKeys: {"Ctrl-Space": "autocomplete"},
+                theme: 'eclipse'
+            });
+            ecss = CodeMirror.fromTextArea(document.getElementById("css"), {
+                mode: "text/css",
+                lineNumbers: true,
+                styleActiveLine: true,
+                matchBrackets: true,
+                extraKeys: {"Ctrl-Space": "autocomplete"},
+                theme: 'eclipse'
+            });
+        }
+
+
+        function render() {
+            var result = "<html>\n<head>\n<style type=\"text/css\" scoped>\n"+ecss.getValue()+"\n</style>\n<script src=\"http://sandboy.de/ljq.js\"></"+"script"+"><script src=\"http://sandboy.de/laj.js\"></"+"script"+">\n<script>\n"+ejs.getValue()+"\n</"+"script"+">\n</head>\n<body>\n"+ehtm.getValue()+"\n</body>\n</html>";
+            document.getElementById('result').src = "data:text/html;charset=utf-8," + escape(result);
+        }
+
         function countdown(){
             clearTimeout(countdownTimer);
             if (renderCountdown && renderCountdown > 1) {
@@ -77,27 +109,40 @@
                 $(".countdown").text(renderCountdown);
                 countdownTimer = setTimeout(countdown, 1000);
             } else {
-                renderCountdown = "";
+                renderCountdown = "0";
                 $(".countdown").text(renderCountdown);
             }
         }
+
         function willRender() {
             clearTimeout(countdownTimer);
+            clearTimeout(renderTimer);
+
+            if (!$("#ar").is(":checked")) return;
+
             renderCountdown=renderInterval;
             $(".countdown").text(renderCountdown);
+
             countdownTimer = setTimeout(countdown, 1000);
 
-            clearTimeout(renderTimer);
             renderTimer = setTimeout(function() {
                 clearTimeout(renderTimer);
                 render();
-            }, renderInterval*1000)
+            }, renderInterval*1000);
+
+            localStorage.setItem("js", ejs.getValue());
+            localStorage.setItem("htm", ehtm.getValue());
+            localStorage.setItem("css", ecss.getValue());
         }
 
-        ejs.on("change", willRender);
-        ehtm.on("change", willRender);
-        ecss.on("change", willRender);
+        function end(){
+            ejs.on("change", willRender);
+            ehtm.on("change", willRender);
+            ecss.on("change", willRender);
+            render();
+        }
 
+        end();
     </script>
 </body>
 </html>
