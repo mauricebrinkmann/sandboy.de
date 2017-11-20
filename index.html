@@ -1,6 +1,9 @@
-<html>
+<!doctype html>
+
+<html lang="en">
 <head>
-    <title></title>
+    <meta charset="utf8"/>
+    <title>Sandboy.de</title>
     <link rel="stylesheet" href="edi.css"/>
     <link rel="stylesheet" href="ecl.css"/>
     <link rel="stylesheet" href="esh.css"/>
@@ -20,7 +23,7 @@
     <script src="ljq.js"></script>
     <script src="laj.js"></script>
     <style>
-        table   { width: 100%; max-width: 100%; min-width: 100%; }
+        table   { width: 100%; table-layout: fixed; }
         td      { width: 33% }
         div.edi { width:100%; min-width: 100%; border:1px solid black; }
     </style>
@@ -48,7 +51,7 @@
         <td class="css"><div class="edi"><textarea id="css" style="display: none;"></textarea></div></td>
     </tr></table>
     <hr/>
-    <iframe id="result" width="100%" frameBorder="0"></iframe>
+    <iframe id="result" width="100%" height="50%" frameBorder="0"></iframe>
     <script>
         var ejs;
         var ehtm;
@@ -100,7 +103,7 @@
 
 
         function render() {
-            var result = "<html>\n<head>\n<style>\n"+ecss.getValue()+"\n</style>\n<script src=\"http://sandboy.de/ljq.js\"></"+"script"+"><script src=\"http://sandboy.de/laj.js\"></"+"script"+">\n<script>\n"+ejs.getValue()+"\n</"+"script"+">\n</head>\n<body>\n"+ehtm.getValue()+"\n</body>\n</html>";
+            var result = "<!doctype html>\n\n<html lang=\"en\">\n<head>\n<meta charset="utf8"/>\n<title>Sandboy.de</title>\n<style>\n"+ecss.getValue()+"\n</style>\n<script src=\"http://sandboy.de/ljq.js\"></"+"script"+"><script src=\"http://sandboy.de/laj.js\"></"+"script"+">\n<script>\n"+ejs.getValue()+"\n</"+"script"+">\n</head>\n<body>\n"+ehtm.getValue()+"\n</body>\n</html>";
             document.getElementById('result').src = "data:text/html;charset=utf-8," + encodeURIComponent(result);
         }
 
@@ -140,8 +143,8 @@
         function extract(uri){
             var src=uri;//?uri:result.getAttribute("src");
             var tmp=decodeURIComponent(src);
-            var script=tmp.substr((tmp.lastIndexOf("<script>")+9),(tmp.lastIndexOf("</"+"script>")-tmp.lastIndexOf("<script>")-9));
-            var style=tmp.substr((tmp.indexOf("<style>")+8),(tmp.indexOf("</style>")-tmp.lastIndexOf("<style")-8));
+            var script=tmp.split("<body>")[0].substr((tmp.lastIndexOf("<script>")+9),(tmp.lastIndexOf("</"+"script>")-tmp.lastIndexOf("<script>")-9));
+            var style=tmp.substr((tmp.indexOf("<style>")+8),(tmp.indexOf("</style>")-tmp.lastIndexOf("<style>")-8));
             var html=tmp.substr((tmp.lastIndexOf("<body>")+7),(tmp.lastIndexOf("</body>")-tmp.lastIndexOf("<body>")-7));
             ejs.setValue(script);
             ecss.setValue(style);
